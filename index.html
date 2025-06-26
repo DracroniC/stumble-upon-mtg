@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Stumble Upon MTG</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 40px;
+      background-color: #1a1a1a;
+      color: white;
+    }
+
+    button {
+      background-color: #5c6bc0;
+      color: white;
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #3949ab;
+    }
+
+    .card-container {
+      margin-top: 30px;
+    }
+
+    .card-container img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(255, 255, 255, 0.1);
+    }
+
+    .attribution {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: #ccc;
+    }
+
+    a {
+      color: #90caf9;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Stumble Upon MTG</h1>
+  <p>Click the button to discover a random Magic: The Gathering card!</p>
+  <button onclick="fetchRandomCard()">Stumble Upon MTG</button>
+
+  <div class="card-container" id="card-container"></div>
+
+  <div class="attribution">
+    Card data and images from <a href="https://scryfall.com" target="_blank" rel="noopener noreferrer">Scryfall</a>.<br>
+    Not affiliated with or endorsed by Wizards of the Coast.
+  </div>
+
+  <script>
+    async function fetchRandomCard() {
+      const cardContainer = document.getElementById('card-container');
+      cardContainer.innerHTML = 'Loading...';
+
+      try {
+        const response = await fetch('https://api.scryfall.com/cards/random');
+        if (!response.ok) {
+          throw new Error('Failed to fetch card');
+        }
+
+        const card = await response.json();
+
+        let imageUrl = '';
+        if (card.image_uris) {
+          imageUrl = card.image_uris.normal;
+        } else if (card.card_faces && card.card_faces[0].image_uris) {
+          // Handle double-faced cards
+          imageUrl = card.card_faces[0].image_uris.normal;
+        } else {
+          throw new Error('Card image not available');
+        }
+
+        cardContainer.innerHTML = `
+          <h2>${card.name}</h2>
+          <img src="${imageUrl}" alt="${card.name}">
+          <p><a href="${card.scryfall_uri}" target="_blank">View on Scryfall</a></p>
+        `;
+      } catch (error) {
+        cardContainer.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+      }
+    }
+  </script>
+
+</body>
+</html>
